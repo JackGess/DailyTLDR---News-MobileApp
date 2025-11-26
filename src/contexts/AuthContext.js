@@ -1,14 +1,14 @@
-import { createContext, useState, useEffect, useContext } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, signInAnonymously} from '@react-native-firebase/auth';
-import {doc, getDoc, setDoc, updateDoc} from '@react-native-firebase/firestore';
-import {auth, db, serverTimestamp} from '@react-native-firebase/firestore';
+import {doc, getDoc, setDoc, updateDoc, serverTimestamp} from '@react-native-firebase/firestore';
+import {auth, db} from '@react-native-firebase/firestore';
 
 const AuthContext = createContext();
 
 export function AuthProvider({children}){
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const isNewUser = !loading && user && !profile;
 
@@ -21,10 +21,10 @@ export function AuthProvider({children}){
         setUser(currentUser);
 
         try{ // check if user exist in the database
-          const userRef = doc(db, 'profile', currentUser.uid);
+          const userRef = doc(db, 'profiles', currentUser.uid);
           const snapShot = await getDoc(userRef);
 
-          if (snapShot.exists) {
+          if (snapShot.exists()) {
             setProfile(snapShot.data());
           } else {
             setProfile(null);
@@ -50,7 +50,7 @@ export function AuthProvider({children}){
     if (!user) throw new Error('User does not exist');
 
     const newProfile = {
-      userid : user.uid,
+      userId : user.uid,
       publicUsername: username,
       topic: "Technology", // default topic
       gemini_settings: { // default gemini prompt
@@ -87,7 +87,5 @@ export function AuthProvider({children}){
   )
 
 }
-
-export const useAuth = () => useContext(AuthContext);
 
 
