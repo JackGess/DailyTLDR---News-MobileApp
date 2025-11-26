@@ -1,34 +1,47 @@
-import {app} from "./src/config/firebase";
-import { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { useContext } from 'react';
+import { Text, ActivityIndicator, StyleSheet} from 'react-native';
+import {AuthProvider, AuthContext} from './src/contexts/AuthContext';
 
-function App(){
-  const [status, setStatus] = useState("Initializing...");
+const AuthStatus = () => {
+  const {user, profile, loading, isNewUser} = useContext(AuthContext);
 
-  useEffect(() => {
-    if(app?.name){
-      setStatus(`Successfully initialized to project : ${app.options.projectId}`);
-      console.log("Firebase App Name:", app.name);
-    } else {
-      setStatus("Failed to initialize app.");
-    }
-  },[])
-
+  if (loading) return <ActivityIndicator size="large" color="blue" />
   return (
     <SafeAreaView>
-      <Text> Daily TLDR Setup </Text>
+      <Text style={styles.label}>Slice 2: Identity Verification</Text>
 
-      { status.includes('Successfully') ? (
-        <Text>{status}</Text>
-      ) : (
-        <View>
-          <ActivityIndicator size="large" color={'green'} />
-          <Text>{status}</Text>
-        </View>
-      )}
+      <Text style={styles.label}>User ID:</Text>
+      <Text style={styles.value}>{user ? user.uid : 'No User'}</Text>
+
+      <Text style={styles.label}>Is New User?</Text>
+      <Text style={styles.value}>{isNewUser ? 'YES (Needs Profile)' : 'NO (Has Profile)'}</Text>
+
+      <Text style={styles.label}>Profile Topic:</Text>
+      <Text style={styles.value}>{profile ? profile.topic : 'N/A'}</Text>
     </SafeAreaView>
-  )
+  );
+}
+
+function App(){
+  return (
+ <AuthProvider>
+   <AuthStatus />
+ </AuthProvider>
+  );
 }
 
 export default App;
+
+const styles = StyleSheet.create({
+  label: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 10
+  },
+  value: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333'
+  }
+});

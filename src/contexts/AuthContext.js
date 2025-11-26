@@ -1,9 +1,9 @@
 import { createContext, useEffect, useState } from 'react';
 import { onAuthStateChanged, signInAnonymously} from '@react-native-firebase/auth';
 import {doc, getDoc, setDoc, updateDoc, serverTimestamp} from '@react-native-firebase/firestore';
-import {auth, db} from '@react-native-firebase/firestore';
+import {auth, db} from '../config/firebase';
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 export function AuthProvider({children}){
   const [user, setUser] = useState(null);
@@ -31,7 +31,7 @@ export function AuthProvider({children}){
           }
 
         } catch (e) {
-          console.error(`Anonymous Authentication Failed - ${e}`);
+          console.error(`Anonymous Authentication Failed -, ${e}`);
         }
 
       } else { // if user does not exist then sign in anonymously
@@ -46,6 +46,8 @@ export function AuthProvider({children}){
 
   return unsubscribe;
   }, []);
+
+
   const createProfile = async (username) => {
     if (!user) throw new Error('User does not exist');
 
