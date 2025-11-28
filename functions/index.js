@@ -29,3 +29,16 @@ exports.genrateManualDigest = onCall(
     return {message: "V2 Backend is alive!", success: true};
     }
   );
+
+
+exports.dailyDigestJob = onSchedule(
+  {
+    schedule: "05 * * *",
+    timeZone: "America/Edmonton",
+    region: "us-west1"
+  },
+  async (event) => {
+    logger.info("Starting Daily Digest Job...");
+    //todo: logic to loop through all users
+  }
+);
