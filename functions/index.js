@@ -95,7 +95,7 @@ const generateDigestForUser = async (userId) => {
 
 
 
-exports.genrateManualDigest = onCall(
+exports.generateManualDigest = onCall(
   {timeoutSeconds: 300}, // 5min timeout for long processing
   async (request) => {
     if (!request.auth) {
@@ -115,12 +115,19 @@ exports.genrateManualDigest = onCall(
 
 exports.dailyDigestJob = onSchedule(
   {
-    schedule: "05 * * *",
-    timeZone: "America/Edmonton",
-    region: "us-west1"
+    schedule: '0 5 * * *',
+    timeZone: 'America/Edmonton',
+    timeoutSeconds: 540,
   },
-  async (event) => {
-    logger.info("Starting Daily Digest Job...");
-    //todo: logic to loop through all users
-  }
+  async event => {
+    logger.info('Starting Daily Digest Job...');
+
+    const profileSnap = await db.collection('profiles').get();
+
+    const batchPromises = profileSnap.docs.map(doc =>
+      generateDigestForUser(doc.id),
+    );
+    await Promise.allSettled(batchPromises);
+    logger.info(`Finished Daily Digest Job...`);
+  },
 );
