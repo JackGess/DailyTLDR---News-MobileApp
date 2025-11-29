@@ -5,6 +5,8 @@ import {AuthProvider, AuthContext} from './src/contexts/AuthContext';
 import {Alert, ScrollView} from "react-native";
 import {triggerManualDigest, getLatestDigest} from "./src/services/DigestService";
 import ArticleCard from "./src/components/ArticleCard"
+import {colors} from './src/theme/colors'
+import AppButton from './src/components/AppButton'
 
 const AuthStatus = () => {
   const {user, profile, loading, isNewUser, createProfile} = useContext(AuthContext);
@@ -48,56 +50,53 @@ const AuthStatus = () => {
 
   if (loading) return <ActivityIndicator size="large" color="blue" />
   return (
-    <SafeAreaView style={{ flex: 1, padding: 20 }}>
-      <View>
-      <Text style={styles.label}>Slice 2: Identity Verification</Text>
+    <SafeAreaView style={styles.container}>
+      {/* HEADER CARD */}
+      <View style={styles.headerCard}>
+        <Text style={styles.appTitle}>Daily TLDR</Text>
 
-      <Text style={styles.label}>User ID:</Text>
-      <Text style={styles.value}>{user ? user.uid : 'No User'}</Text>
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>User Status:</Text>
+          <Text style={styles.value}>{isNewUser ? 'Needs Profile' : '✅ Active'}</Text>
+        </View>
 
-      <Text style={styles.label}>Is New User?</Text>
-      <Text style={styles.value}>{isNewUser ? 'YES (Needs Profile)' : 'NO (Has Profile)'}</Text>
-
-      <Text style={styles.label}>Profile Topic:</Text>
-      <Text style={styles.value}>{profile ? profile.topic : 'N/A'}</Text>
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>Topic:</Text>
+          <Text style={styles.value}>{profile ? profile.topic : '---'}</Text>
+        </View>
       </View>
 
-      {isNewUser ? (
-        //if user needs a profile
-        <View style={{ marginTop: 20 }}>
-          <Button
-            title={isCreating ? "Creating..." : "Create Test Profile"}
+      {/* ACTION AREA */}
+      <View style={styles.actionContainer}>
+        {isNewUser ? (
+          <AppButton
+            title="Create User Profile"
             onPress={handleCreate}
-            disabled={isCreating}
+            loading={isCreating}
           />
-        </View>
-      ) : (
-        //if profile exists
-        <View style={{ marginTop: 20 }}>
-          <Button
-            title={generating ? "Generating (~20s)..." : "Generate Daily Digest"}
+        ) : (
+          <AppButton
+            title={generating ? "AI is Reading News..." : "Generate Daily Digest"}
             onPress={handleGenerate}
-            disabled={generating}
-            color="blue"
+            loading={generating}
           />
-        </View>
-      )}
+        )}
+      </View>
 
-      {/* RESULT DISPLAY */}
+      {/* RESULTS AREA */}
       {digestData && (
-        <View style={{ flex: 1, marginTop: 20 }}>
-          <Text style={styles.resultHeader}>
-            Morning Brief: {digestData.topic}
-          </Text>
+        <ScrollView style={styles.resultBox} showsVerticalScrollIndicator={false}>
+          <Text style={styles.resultHeader}>Morning Briefing</Text>
+          <Text style={styles.topicBadge}>{digestData.topic}</Text>
 
-          <FlatList
-            data={digestData.article_sections}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item }) => <ArticleCard article={item} />}
-            contentContainerStyle={{ paddingBottom: 20 }}
-            showsVerticalScrollIndicator={false}
-          />
-        </View>
+          <Text style={styles.subHeader}>⚡ Key Takeaways</Text>
+          {digestData.overall_key_takeaways && digestData.overall_key_takeaways.map((point, index) => (
+            <View key={index} style={styles.bulletRow}>
+              <Text style={styles.bulletDot}>•</Text>
+              <Text style={styles.bulletText}>{point}</Text>
+            </View>
+          ))}
+        </ScrollView>
       )}
     </SafeAreaView>
   );
@@ -114,39 +113,89 @@ function App(){
 export default App;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: colors.background,
+  },
+  headerCard: {
+    backgroundColor: colors.white,
+    padding: 20,
+    borderRadius: 12,
+    marginBottom: 20,
+    shadowColor: colors.dark,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  appTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: colors.darkest,
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
   label: {
     fontSize: 16,
-    color: '#666',
-    marginTop: 10
+    color: colors.dark,
   },
   value: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
-    color: '#333'
+    color: colors.darkest,
   },
-
+  actionContainer: {
+    marginBottom: 20,
+  },
   resultBox: {
-    marginTop: 20,
-    padding: 15,
-    backgroundColor: '#e8f5e9',
-    borderRadius: 8,
-    maxHeight: 300,
     flex: 1,
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    padding: 20,
+    elevation: 2,
   },
   resultHeader: {
+    fontSize: 20,
     fontWeight: 'bold',
-    fontSize: 18,
+    color: colors.darkest,
     marginBottom: 5,
-    color: '#2e7d32',
+  },
+  topicBadge: {
+    color: colors.primary,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    fontSize: 12,
+    marginBottom: 15,
   },
   subHeader: {
+    fontSize: 18,
     fontWeight: 'bold',
-    marginTop: 10,
-    marginBottom: 5,
+    color: colors.dark,
+    marginBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.lightest,
+    paddingBottom: 5,
   },
-  bulletPoint: {
-    fontSize: 14,
-    marginBottom: 4,
-    lineHeight: 20,
-  }
+  bulletRow: {
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  bulletDot: {
+    fontSize: 18,
+    color: colors.primary,
+    marginRight: 8,
+    lineHeight: 22,
+  },
+  bulletText: {
+    fontSize: 15,
+    color: '#333',
+    lineHeight: 22,
+    flex: 1,
+  },
 });
