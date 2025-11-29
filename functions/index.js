@@ -65,26 +65,51 @@ const generateDigestForUser = async (userId) => {
     }
   });
 
+
+  const results = await Promise.allSettled(processingPromises);
+
+  const validSections = results
+    .filter((r) => r.status === "fulfilled" && r.value !== null)
+    .map((r) => r.value);
+
+  if (validSections.length === 0) {
+    throw new Error(`All articles failed to process.`);
+  }
+
+  const overallTakeaways = validSections.map((s) => s.key_takeaway);
+
+  const digestData = {
+    userId: userId,
+    topic: topic,
+    overall_key_takeaways: overallTakeaways,
+    article_sections: validSections,
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+
+  await db.collection("digests").add(digestData);
+  logger.info(`Digest created successfully for ${userId}`);
+
+  return {success:true, count: validSections.length};
+
 }
 
 
+
 exports.genrateManualDigest = onCall(
-  {
-  cors: true,
-  timeoutSeconds: 60,
-  region: "us-west1"
-  },
+  {timeoutSeconds: 300}, // 5min timeout for long processing
   async (request) => {
-    if(!request.auth) {
-     throw new HttpsError("Unauthenticated", "The Function must be called while authenticated.");
+    if (!request.auth) {
+      throw new HttpsError("unauthenticated", "User must be logged in.");
     }
 
-    logger.info("Manual Digest Requested by: ", request.auth.uid);
-
-    //todo: needs to  be connected
-
-    return {message: "V2 Backend is alive!", success: true};
+    try {
+      const result = await generateDigestForUser(request.auth.uid);
+      return result;
+    } catch (e) {
+      logger.error("Failed to Manually generate Digest:", e);
+      throw new HttpsError("internal", e.message);
     }
+  }
   );
 
 
