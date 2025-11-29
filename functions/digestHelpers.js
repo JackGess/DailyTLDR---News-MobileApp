@@ -64,3 +64,5 @@ const generateSummary = async (markdownContent, tone = "Informative", format = "
     return null;
   }
 };
+
+module.exports = { generateSummary };
