@@ -13,7 +13,8 @@ import { colors } from './src/theme/colors';
 // Screens
 import HomePage from './src/screens/01_HomePage';
 import WelcomeSetupPage from './src/screens/00_WelcomeSetupPage';
-// import CustomizationScreen from './src/screens/03_CustomizationPage';
+import CustomizationPage from './src/screens/03_CustomizationPage';
+import SettingsPage from './src/screens/04_SettingPage';
 
 // Placeholders for your teammates
 const BookmarksScreen = () => (
@@ -21,11 +22,7 @@ const BookmarksScreen = () => (
     <Text style={{color: colors.dark}}>Bookmarks Page (Coming Soon)</Text>
   </View>
 );
-const SettingsScreen = () => (
-  <View style={{flex:1, justifyContent:'center', alignItems:'center'}}>
-    <Text style={{color: colors.dark}}>Settings Page (Coming Soon)</Text>
-  </View>
-);
+
 
 const Tab = createBottomTabNavigator();
 
@@ -50,8 +47,8 @@ const MainTabs = () => {
     >
       <Tab.Screen name="Home" component={HomePage} />
       <Tab.Screen name="Bookmarks" component={BookmarksScreen} />
-      {/*<Tab.Screen name="Customize" component={CustomizationScreen} />*/}
-      <Tab.Screen name="Settings" component={SettingsScreen} />
+      <Tab.Screen name="Customize" component={CustomizationPage} />
+      <Tab.Screen name="Settings" component={SettingsPage} />
     </Tab.Navigator>
   );
 };
