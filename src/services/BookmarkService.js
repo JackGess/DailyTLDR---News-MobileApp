@@ -9,7 +9,7 @@ const db = getFirestore();
  */
 export const addBookmark = async (userId, digest) => {
   try {
-    // origina digestId will be used as the id in the bookmark collection to prevent duplication
+    // original digestId will be used as the id in the bookmark collection to prevent duplication
     const bookmarkRef = doc(db, 'profiles', userId, 'bookmarks', digest.id);
 
     await setDoc(bookmarkRef, {
@@ -18,6 +18,8 @@ export const addBookmark = async (userId, digest) => {
     });
 
     console.log("Bookmark added");
+
+    return true;
   } catch (e) {
     console.error("Failed to add the article to bookmark:",e);
     throw e;
@@ -34,6 +36,7 @@ export const removeBookmark = async (userId, digestId) => {
     const bookmarkRef = doc(db, 'profiles', userId, 'bookmarks', digestId);
     await deleteDoc(bookmarkRef);
     console.log("Bookmark removed!");
+    return true;
   } catch (e) {
     console.error("Failed to remove the article to bookmark:", e);
     throw e;
