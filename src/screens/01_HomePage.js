@@ -12,7 +12,7 @@ import HomeArticleCard from '../components/HomeArticleCard';
 import { colors } from '../theme/colors';
 
 const HomePage = () => {
-  const { user } = useContext(AuthContext);
+  const { user, profile } = useContext(AuthContext);
   const { isTTSEnabled, speak, stopSpeaking, isSpeaking } = useContext(SettingsContext);
 
   const [allDigests, setAllDigests] = useState([]);
@@ -66,7 +66,11 @@ const HomePage = () => {
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      await triggerManualDigest();
+      await triggerManualDigest(
+        user.uid,
+        profile?.gemini_settings?.tone,
+        profile?.gemini_settings?.format
+      );
       setTimeout(() => loadData(), 2000);
     } catch (error) {
       Alert.alert("Limit Reached", error.message);

@@ -3,10 +3,10 @@ import firestore from '@react-native-firebase/firestore';
 
 const NUM_OF_DISPLAYED_DAYS = 7;
 
-export const triggerManualDigest = async () => {
+export const triggerManualDigest = async (uid, tone, format) => {
   try {
     const generateDigest = functions().httpsCallable('generateManualDigest');
-    const result = await generateDigest();
+    const result = await generateDigest({uid, tone, format});
     return result.data;
   } catch (error) {
     console.error("Trigger Failed:", error);
